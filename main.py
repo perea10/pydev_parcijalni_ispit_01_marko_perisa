@@ -1,28 +1,46 @@
 import json
-
+from typing import Dict
+import os
 
 OFFERS_FILE = "offers.json"
 PRODUCTS_FILE = "products.json"
 CUSTOMERS_FILE = "customers.json"
+STARS = 40
 
 
-def load_data(filename):
+def load_data(customers, offers, products):
     """Load data from a JSON file."""
     try:
-        with open(filename, "r") as file:
-            return json.load(file)
+        with open(customers, "r") as file_reader_customers:
+            return json.load(file_reader_customers)
     except FileNotFoundError:
         return []
     except json.JSONDecodeError:
-        print(f"Error decoding {filename}. Check file format.")
+        print(f"Error decoding {file_reader_customers}. Check file format.")
+        return []
+    try:
+        with open(offers, "r") as file_reader_offers:
+            return json.load(file_reader_offers)
+    except FileNotFoundError:
+        return []
+    except json.JSONDecodeError:
+        print(f"Error decoding {file_reader_offers}. Check file format.")
+        return []
+    try:
+        with open(products, "r") as file_reader_products:
+            return json.load(file_reader_products)
+    except FileNotFoundError:
+        return []
+    except json.JSONDecodeError:
+        print(f"Error decoding {file_reader_products}. Check file format.")
         return []
 
 
-def save_data(filename, data):
+def save_data(offers, products):
     """Save data to a JSON file."""
-    with open(filename, "w") as file:
-        json.dump(data, file, indent=4)
-
+    with open(offers, "w") as file_writer:
+        json.dump(products, offers, indent=4)
+    return products, offers
 
 # TODO: Implementirajte funkciju za kreiranje nove ponude.
 def create_new_offer(offers, products, customers):
@@ -30,31 +48,150 @@ def create_new_offer(offers, products, customers):
     Prompt user to create a new offer by selecting a customer, entering date,
     choosing products, and calculating totals.
     """
+    offers = load_data(OFFERS_FILE)
+    products = load_data(PRODUCTS_FILE)
+    customers = load_data(CUSTOMERS_FILE)
     # Omogućite unos kupca
+
+    # Print liste kupaca -> kupac upise broj ispred a vi onda pokupite te podatke
+    # za ovo bi dobro dosla while True petlja s brake izlazom
+    print('\n\n Kreiranje nove ponude ')
+    print('*'*STARS)
+    print(offers)
+    print('1. Odabir kupca')
+    print('2. Odabir proizvoda i količine')
+    print('3. Izračun ukupne cijene')
+    print('*'*STARS)
+
+selected_items = []
+while True:
+        print("Dostupni proizvodi:")
+        for product in products:
+            print(f"{product['id']}. {product['name']} - {product['price']}")
+        
+        try:
+            product_id = int(input('Unesite ID proizvoda: '))
+            if product_id == 0:
+                break
+        product = ''
+        for product in products:
+            if product["id"] == product_id:
+                break
+
+        quantity = int(input("Unesite količinu: "))
+        selected_items.append({
+                "product_name": product["name"],
+                "quantity": quantity,
+                "price": product["price"],
+                "total": product["price"] * quantity
+            })
+        except ValueError:
+            print("Neispravan unos!")
+
+    menu_choice = input()
+
+    match menu_choice:
+        case 1:
+            print(offers)
+        
+        case 2:
+
+
     # Izračunajte sub_total, tax i total
+    # mozda dodati novu funkciju koja racuna total, tax i total
     # Dodajte novu ponudu u listu offers
-    pass
+
 
 
 # TODO: Implementirajte funkciju za upravljanje proizvodima.
-def manage_products(products):
+def manage_products(products: Dict):
     """
     Allows the user to add a new product or modify an existing product.
     """
+    while True:
+        print("\nUpravljanje proizvodima:")
+        print("1. Dodaj novi proizvod")
+        print("2. Ažuriraj postojeći proizvod")
+        print("3. Povratak na glavni izbornik")
+        choice = input("Odaberite opciju: ")
+        id = 0
+        products = {}
+        choice = input()
+        match choice:
+            case 1:
+                name = input("Unesite naziv proizvoda: ")
+                description = input("Unesite opis proizvoda: ")
+                try:
+                    price = float(input("Unesite cijenu proizvoda: "))
+                except:
+                    print("Neispravan unos cijene!")
+                    continue
+                
+                new_product = {
+                    "id": id + 1,
+                    "name": name,
+                    "description": description,
+                    "price": price
+                }
+                products.append(new_product)
+                print("Proizvod uspješno dodan!")
+            
+        
+            case 2:
+                print('Proizvodi:')
+                for product in products:
+                    print(f"{product['id']} {product['name']} {product['price']}")
+
+            case 3:
+                break
+                
+            
+
     # Omogućite korisniku izbor između dodavanja ili izmjene proizvoda
     # Za dodavanje: unesite podatke o proizvodu i dodajte ga u listu products
     # Za izmjenu: selektirajte proizvod i ažurirajte podatke
-    pass
+    
 
 
 # TODO: Implementirajte funkciju za upravljanje kupcima.
-def manage_customers(customers):
+def manage_customers(customers: Dict):
     """
     Allows the user to add a new customer or view all customers.
     """
+    while True:
+        print("\nUpravljanje kupcima:")
+        print("1. Dodaj novog kupca")
+        print("2. Prikaži sve kupce")
+        print("3. Povratak na glavni izbornik")
+        choice = input("Odaberite opciju: ")
+        
+        match choice:
+            case 1:
+                name = input("Unesite ime kupca: ")
+                email = input("Unesite email kupca: ")
+                vat_id = input("Unesite VAT ID kupca: ")
+            
+                new_customer = {
+                        "name": name,
+                        "email": email,
+                        "vat_id": vat_id
+                    }
+                customers.append(new_customer)
+                print("Kupac uspješno dodan!")
+        
+            case 2:
+                print("Popis svih kupaca:")
+                for customer in customers:
+                    print(f"Ime: {customer['name']}, Email: {customer['email']}, VAT ID: {customer['vat_id']}")
+            
+            case 3:
+                break
+                
+    else:
+        print("Neispravan unos, pokušajte ponovo.")
     # Za dodavanje: omogući unos imena kupca, emaila i unos VAT ID-a
     # Za pregled: prikaži listu svih kupaca
-    pass
+    
 
 
 # TODO: Implementirajte funkciju za prikaz ponuda.
