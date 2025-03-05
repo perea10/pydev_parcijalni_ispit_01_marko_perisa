@@ -10,3 +10,7 @@ class Product:
         self.price = price
         self.description = description
 
+
+
+    def __repr__(self):
+        return f'Naziv: {self.name}'
